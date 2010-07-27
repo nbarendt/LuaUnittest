@@ -2,6 +2,7 @@ module( ..., package.seeall)
 
 require "object"
 require "os"
+require "debug"
 
 TestCase = object.Object{log="", _init={"name",},  name=""}
 
@@ -26,7 +27,8 @@ function TestCase:run (result)
     self:setUp()
     self.log = self.log .. "setUp"
     local method = self[self.name]
-    local status, err = pcall(function () method(self) end)
+    local status, err = xpcall(function () method(self) end,
+        function (err) return debug.traceback() end)
     if status then
         self.log = self.log .. " " .. self.name
     end
@@ -95,7 +97,7 @@ function TestResult:getFailures ()
             result = state[current_run]
             current_run = current_run + 1
             if not result then return nil end
-            if nil ~= result.error then return result end
+            if nil ~= result.err then return result end
         end
         return result
     end

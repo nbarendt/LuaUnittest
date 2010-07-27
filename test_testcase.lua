@@ -25,7 +25,6 @@ function TestCaseTest:testWasRun ()
     local result = testcase.TestResult{}
     self:assertEqual( "", self.test.log)
     self.test:run(result)
-    print(result:failureDetails())
     local expected_log = "setUp testMethod tearDown"
     self:assertEqual( expected_log, self.test.log)
 end
@@ -39,27 +38,6 @@ function TestCaseTest:testTearDownEvenOnTestError ()
     self:assertEqual( expected_log, self.test.log)
 end
 
-function TestCaseTest:testResult ()
-    local result = testcase.TestResult{}
-    self.test:run(result)
-    self:assertEqual( "1 run, 0 failed", result:summary())
-end
-
-function TestCaseTest:testResultFailureSummary()
-    local result = testcase.TestResult{}
-    result:started()
-    result:failed('sampletest', 'failure reason would go here')
-    self:assertEqual("1 run, 1 failed", result:summary())
-end
-
-function TestCaseTest:testResultFailureDetails()
-    local result = testcase.TestResult{}
-    result:started()
-    result:failed('sampletest', 'failure reason would go here')
-    self:assertEqual("TEST: sampletest  REASON: failure reason would go here",
-       result:failureDetails())
-end
-
 function TestCaseTest:testSuite ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
@@ -69,18 +47,17 @@ function TestCaseTest:testSuite ()
     self:assertEqual("2 run, 1 failed", result:summary())
 end
 
---[[
 
 local result = testcase.TestResult{}
 suite = testcase.TestSuite{}
-suite:add(TestCaseTest{"testResultFailureSummary"})
-suite:add(TestCaseTest{"testResultFailureDetails"})
 suite:add(TestCaseTest{"testWasRun"})
 suite:add(TestCaseTest{"testTearDownEvenOnTestError"})
-suite:add(TestCaseTest{"testResult"})
 suite:add(TestCaseTest{"testSuite"})
 suite:run(result)
 print(result:summary())
 if not result:status() then
+    for res in result:getFailures() do
+        print(string.format("TEST: %s", res.name))
+        print(string.format("%s\n--------", res.err))
+    end
 end
-]]
