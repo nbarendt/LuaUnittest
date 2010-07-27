@@ -2,7 +2,7 @@
 require "object"
 require "testcase"
 
-WasRun = testcase.TestCase{name="testMethod",}
+WasRun = testcase.TestCase{}
 
 function WasRun:testMethod ()
 end
@@ -14,7 +14,7 @@ end
 TestCaseTest = testcase.TestCase{}
 
 function TestCaseTest:setUp ()
-    self.test = WasRun{}
+    self.test = WasRun{name="testMethod"}
 end
 
 function TestCaseTest:tearDown()
@@ -41,18 +41,26 @@ end
 function TestCaseTest:testSuite ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(WasRun{name="testMethod"})
-    suite:add(WasRun{name="testForcedError"})
+    suite:add(WasRun)
     suite:run(result)
-    self:assertEqual("2 run, 1 failed", result:summary())
+    self:assertEqual(false, result:status())
+    self:assertEqual(2, result:getRunCount())
+    self:assertEqual(1, result:getFailureCount())
 end
 
+function TestCaseTest:testSuiteAutoDiscoversTestMethods ()
+    local suite = testcase.TestSuite{}
+    local result = testcase.TestResult{}
+    suite:add(WasRun)
+    suite:run(result)
+    self:assertEqual(false, result:status())
+    self:assertEqual(2, result:getRunCount())
+    self:assertEqual(1, result:getFailureCount())
+end
 
 local result = testcase.TestResult{}
 suite = testcase.TestSuite{}
-suite:add(TestCaseTest{"testWasRun"})
-suite:add(TestCaseTest{"testTearDownEvenOnTestError"})
-suite:add(TestCaseTest{"testSuite"})
+suite:add(TestCaseTest)
 suite:run(result)
 print(result:summary())
 if not result:status() then

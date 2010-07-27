@@ -27,14 +27,33 @@ function TestCase:run (result)
     self:setUp()
     self.log = self.log .. "setUp"
     local method = self[self.name]
+    local err_reporter = function (err)
+        return err .. "\n" .. debug.traceback()
+    end
     local status, err = xpcall(function () method(self) end,
-        function (err) return debug.traceback() end)
+        err_reporter)
     if status then
         self.log = self.log .. " " .. self.name
     end
     self:tearDown()
     self.log = self.log .. " " .. "tearDown"
     result:completed( os.clock(), err)
+end
+
+function TestCase:getTestMethodNames ()
+    local state = self
+    local curr_key = nil
+    local iterator = function ()
+        while true do
+            curr_key, curr_value = next(state, curr_key)
+            if not curr_value then return nil end
+            if type(curr_value) == "function" and string.sub(curr_key, 1, 4) ==
+                "test" then return curr_key
+            end
+        end
+    end
+    return iterator, nil, nil
+
 end
 
 TestResult = object.Object{ __call = function(...)
@@ -111,7 +130,9 @@ TestSuite = TestCase{ __call = function (...)
     end, }
 
 function TestSuite:add(test)
-    self.tests[#self.tests + 1] = test
+    for t in test:getTestMethodNames() do
+        self.tests[#self.tests + 1] = test{t}
+    end
 end
 
 function TestSuite:run(result)

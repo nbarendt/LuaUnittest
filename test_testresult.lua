@@ -23,7 +23,6 @@ function TestCaseTest:testWasRun ()
     local result = testcase.TestResult{}
     self:assertEqual( "", self.test.log)
     self.test:run(result)
-    print(result:failureDetails())
     local expected_log = "setUp testMethod tearDown"
     self:assertEqual( expected_log, self.test.log)
 end
@@ -40,19 +39,19 @@ end
 function TestCaseTest:testSuite ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(WasRun{name="testMethod"})
-    suite:add(WasRun{name="testForcedError"})
+    suite:add(WasRun)
     suite:run(result)
     self:assertEqual("2 run, 1 failed", result:summary())
 end
 
 local result = testcase.TestResult{}
 suite = testcase.TestSuite{}
-suite:add(TestCaseTest{"testWasRun"})
-suite:add(TestCaseTest{"testTearDownEvenOnTestError"})
-suite:add(TestCaseTest{"testSuite"})
+suite:add(TestCaseTest)
 suite:run(result)
-assert(false)
 print(result:summary())
 if not result:status() then
+    for res in result:getFailures() do
+        print(string.format("TEST: %s", res.name))
+        print(string.format("%s\n--------", res.err))
+    end
 end
