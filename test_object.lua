@@ -1,3 +1,5 @@
+module( ..., package.seeall)
+
 require "object"
 
 test_baseclass = object.Object{ __call = function (...)

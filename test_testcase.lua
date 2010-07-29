@@ -1,3 +1,4 @@
+module(..., package.seeall)
 
 require "object"
 require "testcase"
@@ -45,14 +46,3 @@ function TestCaseTest:testSuiteAutoDiscoversTestMethods ()
     self:assertEqual(0, result:getFailureCount())
 end
 
-local result = testcase.TestResult{}
-suite = testcase.TestSuite{}
-suite:add(TestCaseTest)
-suite:run(result)
-print(result:summary())
-if not result:status() then
-    for res in result:getFailures() do
-        print(string.format("TEST: %s", res.name))
-        print(string.format("%s\n--------", res.err))
-    end
-end

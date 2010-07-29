@@ -18,6 +18,11 @@ function TestCase:assertEqual(expected, actual, msg)
                 tostring(actual)))
 end
 
+function TestCase:assertNotNil(value, msg)
+    assert(value ~= nil, msg or string.format("value %s of type %s is not nil",
+        tostring(value), type(value)))
+end
+
 function TestCase:assertStartsWith(prefix, actual, msg)
     self:assertEqual(prefix, actual:sub(1, prefix:len()), msg or 
         string.format('"%s" does not start with "%s"', actual, prefix))
@@ -41,8 +46,8 @@ function TestCase:run (result)
     result:completed( os.clock(), err)
 end
 
-function TestCase:getTestMethodNames ()
-    local state = self
+function getTestMethodNames (testobj)
+    local state = testobj 
     local curr_key = nil
     local iterator = function ()
         while true do
@@ -54,7 +59,6 @@ function TestCase:getTestMethodNames ()
         end
     end
     return iterator, nil, nil
-
 end
 
 TestResult = object.Object{ __call = function(...)
@@ -148,15 +152,29 @@ function FailureReporter:report ()
     return table.concat(res, "\n")
 end
 
-TestSuite = TestCase{ __call = function (...)
-    o = (...)._clone(...)
-    o.tests = {}
-    return o
-    end, }
+TestSuite = TestCase{ _init = {'filenames',},
+    __call = function (...)
+        o = (...)._clone(...)
+        o.tests = {}
+        o.filenames = o.filenames or {}
+        if type(o.filenames) == string then
+            o.filenames = {o.filenames}
+        end
+        for k, v in pairs(o.filenames) do
+            local tmp_modname, tmp_testcases = discoverTestCases(v)
+            if tmp_modname then
+                for k, tstcase in pairs(tmp_testcases) do
+                    o:add(package.loaded[tmp_modname][tstcase])
+                end
+            end
+        end
+        return o
+        end, 
+    }
 
-function TestSuite:add(test)
-    for t in test:getTestMethodNames() do
-        self.tests[#self.tests + 1] = test{t}
+function TestSuite:add(testobj)
+    for t in getTestMethodNames(testobj) do
+        self.tests[#self.tests + 1] = testobj{t}
     end
 end
 
@@ -166,4 +184,39 @@ function TestSuite:run(result)
     end
 end
 
+function generateRandomModuleName()
+    local r = math.random() -- random value to keep package namespace clean
+    return 'auto_test_discovery_' .. tostring(r)
+end
+
+function trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+function discoverTestCases(filename)
+    local test_module_function = loadfile(filename)
+    if not test_module_function then
+        return nil
+    end
+    local tmp_mod_name = generateRandomModuleName() 
+    test_module_function(tmp_mod_name)
+    local results = {}
+    if not package.loaded[tmp_mod_name] then return nil end -- not a module
+    for k, v in pairs(package.loaded[tmp_mod_name]) do
+        if type(k) == "string" and k:lower():find('test')
+            and type(v) == "table" then
+            results[ #results + 1 ] = k
+        end
+    end
+    return tmp_mod_name, results
+end
+
+function findTestFiles()
+    local results = {}
+    local find_command_output = io.popen('find . -iname "test*.lua" -print')
+    for filename in find_command_output:lines() do
+        results[ #results + 1] = trim(filename)   
+    end
+    return results
+end
 

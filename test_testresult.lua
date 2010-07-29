@@ -1,3 +1,5 @@
+module(..., package.seeall)
+
 require "testcase"
 require "sampletestcases"
 
@@ -98,14 +100,3 @@ failure
     self:assertEqual(expected, reporter:report())
 end
 
-
-local result = testcase.TestResult{}
-suite = testcase.TestSuite{}
-suite:add(TestResultTest)
-suite:run(result)
-print(result:summary())
-if not result:status() then
-    print(testcase.FailureReporter{result}:report())
-else
-    print("OK")
-end
