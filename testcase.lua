@@ -4,7 +4,7 @@ require "object"
 require "os"
 require "debug"
 
-TestCase = object.Object{log="", _init={"name",},  name=""}
+TestCase = object.Object{_init={"name",},  name=""}
 
 function TestCase:setUp()
 end
@@ -15,7 +15,7 @@ end
 function TestCase:assertEqual(expected, actual, msg)
     if expected ~= actual then
         if nil == msg then
-            msg = string.format("%s ~= %s", tostring(expected),
+            msg = string.format("'%s' ~= '%s'", tostring(expected),
                 tostring(actual))
         end
         error(msg)
@@ -25,18 +25,13 @@ end
 function TestCase:run (result)
     result:started(self.name, os.clock())
     self:setUp()
-    self.log = self.log .. "setUp"
     local method = self[self.name]
     local err_reporter = function (err)
         return err .. "\n" .. debug.traceback()
     end
     local status, err = xpcall(function () method(self) end,
         err_reporter)
-    if status then
-        self.log = self.log .. " " .. self.name
-    end
     self:tearDown()
-    self.log = self.log .. " " .. "tearDown"
     result:completed( os.clock(), err)
 end
 
@@ -110,11 +105,11 @@ end
 
 function TestResult:getFailures ()
     local state = self.testruns
-    local current_run = 1
+    local current_result = 1
     local iterator = function ()
         while true do
-            result = state[current_run]
-            current_run = current_run + 1
+            result = state[current_result]
+            current_result = current_result + 1
             if not result then return nil end
             if nil ~= result.err then return result end
         end

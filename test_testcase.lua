@@ -1,61 +1,47 @@
 
 require "object"
 require "testcase"
-
-WasRun = testcase.TestCase{}
-
-function WasRun:testMethod ()
-end
-
-function WasRun:testForcedError ()
-    error("forced error")
-end
+require "sampletestcases"
 
 TestCaseTest = testcase.TestCase{}
 
-function TestCaseTest:setUp ()
-    self.test = WasRun{name="testMethod"}
-end
-
-function TestCaseTest:tearDown()
-    self.test = nil
-end
-
-function TestCaseTest:testWasRun ()
+function TestCaseTest:testSimpleExecutionOrder ()
     local result = testcase.TestResult{}
-    self:assertEqual( "", self.test.log)
-    self.test:run(result)
-    local expected_log = "setUp testMethod tearDown"
-    self:assertEqual( expected_log, self.test.log)
+    test = sampletestcases.SimplestTestCase{name="testWillAlwaysPass"}
+    self:assertEqual( "", test.log)
+    test:run(result)
+    local expected_log = "setUp testWillAlwaysPass tearDown"
+    self:assertEqual( expected_log, test.log)
 end
 
 function TestCaseTest:testTearDownEvenOnTestError ()
     local result = testcase.TestResult{}
-    self:assertEqual("", self.test.log)
-    self.test.name = "testForcedError"
-    self.test:run(result)
+    test = sampletestcases.ForcedErrorTestCase{}
+    self:assertEqual("", test.log)
+    test.name = "testWillError"
+    test:run(result)
     local expected_log = "setUp tearDown"
-    self:assertEqual( expected_log, self.test.log)
+    self:assertEqual( expected_log, test.log)
 end
 
 function TestCaseTest:testSuite ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(WasRun)
+    suite:add(sampletestcases.SimplestTestCase{})
+    suite:add(sampletestcases.ForcedErrorTestCase{})
     suite:run(result)
-    self:assertEqual(false, result:status())
-    self:assertEqual(2, result:getRunCount())
-    self:assertEqual(1, result:getFailureCount())
+    self:assertEqual("2 run, 1 failed", result:summary())
 end
+
 
 function TestCaseTest:testSuiteAutoDiscoversTestMethods ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(WasRun)
+    suite:add(sampletestcases.MultipleTestsTestCase)
     suite:run(result)
-    self:assertEqual(false, result:status())
-    self:assertEqual(2, result:getRunCount())
-    self:assertEqual(1, result:getFailureCount())
+    self:assertEqual(true, result:status())
+    self:assertEqual(3, result:getRunCount())
+    self:assertEqual(0, result:getFailureCount())
 end
 
 local result = testcase.TestResult{}
