@@ -3,18 +3,18 @@ module(..., package.seeall)
 require "testcase"
 require "table"
 
-TestTestDiscovery = testcase.TestCase{}
+TestTestDiscovery = testcase.TestCase{
 
-function TestTestDiscovery:setUp ()
+setUp = function(self)
     self.sample_filename = "sampletestcases.lua"
     self.expected_test_cases = {'TestCaseWithLogging',
         'TestSimplestCase', 'TestForcedErrorCase', 'TestMultipleTestsCase'}
     self.expected_test_count = 5
     table.sort(self.expected_test_cases)
     self.sample_filename = "sampletestcases.lua"
-end
+end,
 
-function TestTestDiscovery:testDiscoverWillReturnExpectedTestCaseNames ()
+testDiscoverWillReturnExpectedTestCaseNames = function (self) 
     local tmp_module, actual_test_cases = testcase.discoverTestCases(
         self.sample_filename)
     self:assertNotNil(tmp_module)
@@ -22,9 +22,9 @@ function TestTestDiscovery:testDiscoverWillReturnExpectedTestCaseNames ()
     for k, v in pairs(self.expected_test_cases) do
         self:assertEqual(v, actual_test_cases[k])
     end
-end
+end,
 
-function TestTestDiscovery:testSuiteWillContainExpectedTestCases ()
+testSuiteWillContainExpectedTestCases = function (self)
     local suite = testcase.TestSuite{{self.sample_filename}}
     self:assertEqual( self.expected_test_count, #suite.tests)
     local result = testcase.TestResult{}
@@ -34,4 +34,4 @@ function TestTestDiscovery:testSuiteWillContainExpectedTestCases ()
     self:assertContains("FAILED (failed=1)", result:summary())
 end
 
-
+}
