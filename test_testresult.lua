@@ -3,8 +3,8 @@ require "sampletestcases"
 
 TestResultTest = testcase.TestCase{}
 TestResultTest.test_data = {
-    {name='testabc', start_time=0, end_time=1, err=nil},
-    {name='test123', start_time=2, end_time=3, err='failure' },
+    {name='testabc', start_time=0.5, end_time=1, err=nil},
+    {name='test123', start_time=2, end_time=3.75, err='failure' },
 }
 
 function TestResultTest:add_test_data (result)
@@ -33,7 +33,15 @@ end
 
 function TestResultTest:testEmptyResultSuccessSummary ()
     local result = testcase.TestResult{}
-    self:assertEqual("0 run, 0 failed", result:summary())
+    local expected = "Ran 0 tests in 0 seconds"
+    self:assertEqual(expected, result:summary())
+end
+
+function TestResultTest:testResultsSummaryFailureAndExectionTimeExpected ()
+    local result = testcase.TestResult {}
+    self:add_test_data(result)
+    local expected = "Ran 2 tests in 3.25 seconds FAILED (failures = 1)" 
+    self:assertEqual(expected, result:summary())
 end
 
 function TestResultTest:testResultReportsExpectedRunCount ()
@@ -76,6 +84,20 @@ function TestResultTest:testFailureIterator ()
     self:assertEqual(self:getExpectedFailureCount(), failure_count)
 end
 
+function TestResultTest:testFailureReporter ()
+    local result = testcase.TestResult{}
+    self:add_test_data(result)
+    local reporter = testcase.FailureReporter{result}
+    local expected = [[
+Failures:
+--------------------------------------------------------------------------------
+TEST:  test123
+--------------------------------------------------------------------------------
+failure
+]]
+    self:assertEqual(expected, reporter:report())
+end
+
 
 local result = testcase.TestResult{}
 suite = testcase.TestSuite{}
@@ -83,8 +105,7 @@ suite:add(TestResultTest)
 suite:run(result)
 print(result:summary())
 if not result:status() then
-    for res in result:getFailures() do
-        print(string.format("TEST: %s", res.name))
-        print(string.format("%s\n--------", res.err))
-    end
+    print(testcase.FailureReporter{result}:report())
+else
+    print("OK")
 end

@@ -84,8 +84,20 @@ function TestResult:getFailureCount ()
 end
 
 function TestResult:summary ()
-    return string.format("%d run, %d failed", self:getRunCount(),
-        self:getFailureCount())
+    local start_time = 0
+    local end_time = 0
+    if self:getRunCount() > 0 then
+        start_time = self.testruns[1].start_time
+        end_time = self.testruns[#self.testruns].end_time
+    end
+    local elapsed_time = end_time - start_time
+    local res = string.format("Ran %d tests in %s seconds", self:getRunCount(),
+        elapsed_time)
+    local failures = self:getFailureCount()
+    if failures > 0 then
+        res = res .. " " .. string.format("FAILED (failures = %d)", failures) 
+    end
+    return res
 end
 
 function TestResult:status ()
@@ -116,6 +128,18 @@ function TestResult:getFailures ()
         return result
     end
     return iterator, nil, nil 
+end
+
+FailureReporter = object.Object{_init={"testResults"}}
+
+function FailureReporter:report ()
+    local sep = string.rep("-", 80)
+    local res = {"Failures:", sep}
+    for run in self.testResults:getFailures() do
+        res[ #res + 1] = string.format("TEST:  %s\n%s\n%s\n",
+                run.name, sep, run.err)
+    end
+    return table.concat(res, "\n")
 end
 
 TestSuite = TestCase{ __call = function (...)
