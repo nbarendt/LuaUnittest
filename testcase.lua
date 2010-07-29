@@ -13,13 +13,19 @@ function TestCase:tearDown()
 end
 
 function TestCase:assertEqual(expected, actual, msg)
-    if expected ~= actual then
-        if nil == msg then
-            msg = string.format("'%s' ~= '%s'", tostring(expected),
-                tostring(actual))
-        end
-        error(msg)
-    end
+    assert( expected == actual, msg or
+            string.format('"%s" ~= "%s"', tostring(expected),
+                tostring(actual)))
+end
+
+function TestCase:assertStartsWith(prefix, actual, msg)
+    self:assertEqual(prefix, actual:sub(1, prefix:len()), msg or 
+        string.format('"%s" does not start with "%s"', actual, prefix))
+end
+
+function TestCase:assertContains(pattern, actual, msg)
+    assert(actual:find(pattern, 1, true), msg or
+        string.format('"%s" not found in "%s"', pattern, actual))
 end
 
 function TestCase:run (result)
@@ -95,7 +101,7 @@ function TestResult:summary ()
         elapsed_time)
     local failures = self:getFailureCount()
     if failures > 0 then
-        res = res .. " " .. string.format("FAILED (failures = %d)", failures) 
+        res = res .. " " .. string.format("FAILED (failed=%d)", failures) 
     end
     return res
 end

@@ -7,7 +7,7 @@ TestCaseTest = testcase.TestCase{}
 
 function TestCaseTest:testSimpleExecutionOrder ()
     local result = testcase.TestResult{}
-    test = sampletestcases.SimplestTestCase{name="testWillAlwaysPass"}
+    test = sampletestcases.TestSimplestCase{name="testWillAlwaysPass"}
     self:assertEqual( "", test.log)
     test:run(result)
     local expected_log = "setUp testWillAlwaysPass tearDown"
@@ -16,7 +16,7 @@ end
 
 function TestCaseTest:testTearDownEvenOnTestError ()
     local result = testcase.TestResult{}
-    test = sampletestcases.ForcedErrorTestCase{}
+    test = sampletestcases.TestForcedErrorCase{}
     self:assertEqual("", test.log)
     test.name = "testWillError"
     test:run(result)
@@ -27,17 +27,18 @@ end
 function TestCaseTest:testSuite ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(sampletestcases.SimplestTestCase{})
-    suite:add(sampletestcases.ForcedErrorTestCase{})
+    suite:add(sampletestcases.TestSimplestCase{})
+    suite:add(sampletestcases.TestForcedErrorCase{})
     suite:run(result)
-    self:assertEqual("2 run, 1 failed", result:summary())
+    self:assertStartsWith("Ran 2 tests", result:summary())
+    self:assertContains("FAILED (failed=1)", result:summary())
 end
 
 
 function TestCaseTest:testSuiteAutoDiscoversTestMethods ()
     local suite = testcase.TestSuite{}
     local result = testcase.TestResult{}
-    suite:add(sampletestcases.MultipleTestsTestCase)
+    suite:add(sampletestcases.TestMultipleTestsCase)
     suite:run(result)
     self:assertEqual(true, result:status())
     self:assertEqual(3, result:getRunCount())

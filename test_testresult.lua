@@ -40,7 +40,7 @@ end
 function TestResultTest:testResultsSummaryFailureAndExectionTimeExpected ()
     local result = testcase.TestResult {}
     self:add_test_data(result)
-    local expected = "Ran 2 tests in 3.25 seconds FAILED (failures = 1)" 
+    local expected = "Ran 2 tests in 3.25 seconds FAILED (failed=1)" 
     self:assertEqual(expected, result:summary())
 end
 

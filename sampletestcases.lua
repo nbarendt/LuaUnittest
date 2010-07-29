@@ -2,31 +2,31 @@ module( ..., package.seeall)
 
 require "testcase"
 
-LoggingTestCase = testcase.TestCase{log=""}
-function LoggingTestCase:setUp ()
+TestCaseWithLogging = testcase.TestCase{log=""}
+function TestCaseWithLogging:setUp ()
     self.log = "setUp"
 end
-function LoggingTestCase:tearDown ()
+function TestCaseWithLogging:tearDown ()
     self.log = self.log .. " " .. "tearDown"
 end
 
-SimplestTestCase = LoggingTestCase{}
-function SimplestTestCase:testWillAlwaysPass ()
+TestSimplestCase = TestCaseWithLogging{}
+function TestSimplestCase:testWillAlwaysPass ()
     self.log = self.log .. " " .. "testWillAlwaysPass"
 end
 
-ForcedErrorTestCase = LoggingTestCase{}
-function ForcedErrorTestCase:testWillError ()
+TestForcedErrorCase = TestCaseWithLogging{}
+function TestForcedErrorCase:testWillError ()
     error("forced error")
 end
 
-MultipleTestsTestCase = testcase.TestCase{}
-function MultipleTestsTestCase:testWillAlwaysPass1 ()
+TestMultipleTestsCase = testcase.TestCase{}
+function TestMultipleTestsCase:testWillAlwaysPass1 ()
 end
 
-function MultipleTestsTestCase:testWillAlwaysPass2 ()
+function TestMultipleTestsCase:testWillAlwaysPass2 ()
 end
 
-function MultipleTestsTestCase:testWillAlwaysPass3 ()
+function TestMultipleTestsCase:testWillAlwaysPass3 ()
 end
 
