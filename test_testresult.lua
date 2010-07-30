@@ -1,9 +1,9 @@
 module(..., package.seeall)
 
-require "testcase"
+require "unittest"
 require "sampletestcases"
 
-TestResultTest = testcase.TestCase{
+TestResultTest = unittest.TestCase{
 
     test_data = {
         {name='testabc', start_time=0.5, end_time=1, err=nil},
@@ -30,38 +30,38 @@ TestResultTest = testcase.TestCase{
     end,
 
     testEmptyResultReportsSuccess = function (self) 
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:assertEqual(true, result:status() )
     end, 
 
     testEmptyResultSuccessSummary = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         local expected = "Ran 0 tests in 0 seconds"
         self:assertEqual(expected, result:summary())
     end, 
 
     testResultsSummaryFailureAndExectionTimeExpected = function (self)
-        local result = testcase.TestResult {}
+        local result = unittest.TestResult {}
         self:add_test_data(result)
         local expected = "Ran 2 tests in 3.25 seconds FAILED (failed=1)" 
         self:assertEqual(expected, result:summary())
     end,
 
     testResultReportsExpectedRunCount = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:add_test_data(result)
         self:assertEqual(self:getExpectedCount(), result:getRunCount())
     end,
 
     testResultReportsExpectedFailureCount = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:add_test_data(result)
         self:assertEqual(self:getExpectedFailureCount(),
             result:getFailureCount())
     end,
 
     testResultIterator = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:add_test_data(result)
         local count = 0
         for res in result:getResults() do
@@ -74,7 +74,7 @@ TestResultTest = testcase.TestCase{
     end,
 
     testFailureIterator = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:add_test_data(result)
         local count = 1
         local failure_count = 0
@@ -89,9 +89,9 @@ TestResultTest = testcase.TestCase{
     end,
 
     testFailureReporter = function (self)
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         self:add_test_data(result)
-        local reporter = testcase.FailureReporter{result}
+        local reporter = unittest.FailureReporter{result}
         local expected = [[
 Failures:
 --------------------------------------------------------------------------------

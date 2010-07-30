@@ -1,26 +1,26 @@
 module( ..., package.seeall)
 
-require "testcase"
+require "unittest"
 
-TestCaseWithLogging = testcase.TestCase{log=""}
-function TestCaseWithLogging:setUp ()
+unittestWithLogging = unittest.TestCase{log=""}
+function unittestWithLogging:setUp ()
     self.log = "setUp"
 end
-function TestCaseWithLogging:tearDown ()
+function unittestWithLogging:tearDown ()
     self.log = self.log .. " " .. "tearDown"
 end
 
-TestSimplestCase = TestCaseWithLogging{}
+TestSimplestCase = unittestWithLogging{}
 function TestSimplestCase:testWillAlwaysPass ()
     self.log = self.log .. " " .. "testWillAlwaysPass"
 end
 
-TestForcedErrorCase = TestCaseWithLogging{}
+TestForcedErrorCase = unittestWithLogging{}
 function TestForcedErrorCase:testWillError ()
     error("forced error")
 end
 
-TestMultipleTestsCase = testcase.TestCase{}
+TestMultipleTestsCase = unittest.TestCase{}
 function TestMultipleTestsCase:testWillAlwaysPass1 ()
 end
 

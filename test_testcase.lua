@@ -1,13 +1,13 @@
 module(..., package.seeall)
 
 require "object"
-require "testcase"
+require "unittest"
 require "sampletestcases"
 
-TestCaseTest = testcase.TestCase{
+unittestTest = unittest.TestCase{
 
     testSimpleExecutionOrder = function (self) 
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         test = sampletestcases.TestSimplestCase{name="testWillAlwaysPass"}
         self:assertEqual( "", test.log)
         test:run(result)
@@ -16,7 +16,7 @@ TestCaseTest = testcase.TestCase{
     end,
 
     testTearDownEvenOnTestError = function (self) 
-        local result = testcase.TestResult{}
+        local result = unittest.TestResult{}
         test = sampletestcases.TestForcedErrorCase{}
         self:assertEqual("", test.log)
         test.name = "testWillError"
@@ -26,8 +26,8 @@ TestCaseTest = testcase.TestCase{
     end,
 
     testSuite = function (self)
-        local suite = testcase.TestSuite{}
-        local result = testcase.TestResult{}
+        local suite = unittest.TestSuite{}
+        local result = unittest.TestResult{}
         suite:add(sampletestcases.TestSimplestCase{})
         suite:add(sampletestcases.TestForcedErrorCase{})
         suite:run(result)
@@ -36,8 +36,8 @@ TestCaseTest = testcase.TestCase{
     end,
 
     testSuiteAutoDiscoversTestMethods = function (self)
-        local suite = testcase.TestSuite{}
-        local result = testcase.TestResult{}
+        local suite = unittest.TestSuite{}
+        local result = unittest.TestResult{}
         suite:add(sampletestcases.TestMultipleTestsCase)
         suite:run(result)
         self:assertEqual(true, result:status())
