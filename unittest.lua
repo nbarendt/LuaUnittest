@@ -3,6 +3,7 @@ module( ..., package.seeall)
 require "object"
 require "os"
 require "debug"
+require "strict"
 
 
 function isTestMethod (name, value)
@@ -146,16 +147,19 @@ TestResult = object.Object{
         return count
     end,
 
-    summary = function (self)
+    getElapsedTime = function (self)
         local start_time = 0
         local end_time = 0
         if self:getRunCount() > 0 then
             start_time = self.testruns[1].start_time
             end_time = self.testruns[#self.testruns].end_time
         end
-        local elapsed_time = end_time - start_time
-        local res = string.format("Ran %d tests in %s seconds",
-            self:getRunCount(), elapsed_time)
+        return end_time - start_time
+    end,
+
+    summary = function (self)
+       local res = string.format("Ran %d tests in %s seconds",
+            self:getRunCount(), self:getElapsedTime())
         local failures = self:getFailureCount()
         if failures > 0 then
             res = res .. " " .. string.format("FAILED (failed=%d)", failures) 
@@ -168,29 +172,21 @@ TestResult = object.Object{
     end,
 
     getResults = function (self)
-        local state = self.testruns
-        local current_run = 1
         local iterator = function ()
-            result = state[current_run]
-            current_run = current_run + 1
-            return result
+            for _, v in ipairs(self.testruns) do
+                coroutine.yield(v)
+            end
         end
-        return iterator, nil, nil 
+        return coroutine.wrap(iterator), nil, nil
     end,
 
     getFailures = function (self)
-        local state = self.testruns
-        local current_result = 1
         local iterator = function ()
-            while true do
-                result = state[current_result]
-                current_result = current_result + 1
-                if not result then return nil end
-                if result.err then return result end
+            for _, v in ipairs(self.testruns) do
+                if v.err then coroutine.yield(v) end
             end
-            return result
         end
-        return iterator, nil, nil 
+        return coroutine.wrap(iterator), nil, nil
     end,
 }
 
