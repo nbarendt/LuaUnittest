@@ -4,19 +4,20 @@ require "object"
 require "os"
 require "debug"
 
+
+function isTestMethod (name, value)
+    return 1 == name:find('test') and type(value) == "function" 
+end
+
+
 function getTestMethodNames (testobj)
-    local state = testobj 
-    local curr_key = nil
-    local iterator = function ()
-        while true do
-            curr_key, curr_value = next(state, curr_key)
-            if not curr_value then return nil end
-            if type(curr_value) == "function" and string.sub(curr_key, 1, 4) ==
-                "test" then return curr_key
-            end
+    local results = {}
+    for k, v in pairs(testobj) do
+        if isTestMethod(k, v) then
+            results[ #results + 1] = k
         end
     end
-    return iterator, nil, nil
+    return results 
 end
 
 function generateRandomModuleName()
@@ -28,18 +29,29 @@ function trim(s)
     return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
-function discoverTestCases(filename)
+function isTestCase (name, value)
+    return type(name) == "string" and 1 == name:lower():find('test') 
+            and type(value) == "table"
+end
+
+function loadTestModule(filename)
     local test_module_function = loadfile(filename)
     if not test_module_function then
         return nil
     end
     local tmp_mod_name = generateRandomModuleName() 
     test_module_function(tmp_mod_name)
+    return tmp_mod_name
+end 
+
+function discoverTestCases(filename)
     local results = {}
-    if not package.loaded[tmp_mod_name] then return nil end -- not a module
+    local tmp_mod_name = loadTestModule(filename)
+    if not package.loaded[tmp_mod_name] then
+        return nil -- not a module
+    end
     for k, v in pairs(package.loaded[tmp_mod_name]) do
-        if type(k) == "string" and k:lower():find('test')
-            and type(v) == "table" then
+        if isTestCase(k, v) then
             results[ #results + 1 ] = k
         end
     end
@@ -110,14 +122,14 @@ TestResult = object.Object{
     end,
        
     started = function (self, test_name, start_time)
-        self.testruns[ #self.testruns + 1 ] = {name=test_name, 
+        self.testruns[#self.testruns+1] = {
+            name=test_name, 
             start_time=start_time}
     end,
 
     completed = function (self, end_time, err)
-        local curr_index = #self.testruns
-        self.testruns[ curr_index ].end_time = end_time
-        self.testruns[ curr_index ].err = err
+        self.testruns[#self.testruns].end_time = end_time
+        self.testruns[#self.testruns].err = err
     end,
 
    getRunCount = function (self)
@@ -126,7 +138,7 @@ TestResult = object.Object{
 
     getFailureCount = function (self)
         local count = 0
-        for _, testrun in pairs(self.testruns) do
+        for _, testrun in ipairs(self.testruns) do
             if nil ~= testrun.err then
                 count = count + 1
             end
@@ -182,6 +194,10 @@ TestResult = object.Object{
     end,
 }
 
+function formatFailure(testName, sep, err)
+    return string.format("TEST:  %s\n%s\n%s\n", testName, sep, err)
+end
+ 
 FailureReporter = object.Object{
     _init={"testResults"},
 
@@ -189,8 +205,7 @@ FailureReporter = object.Object{
         local sep = string.rep("-", 80)
         local res = {"Failures:", sep}
         for run in self.testResults:getFailures() do
-            res[ #res + 1] = string.format("TEST:  %s\n%s\n%s\n",
-                    run.name, sep, run.err)
+            res[ #res + 1] = formatFailure(run.name, sep, run.err) 
         end
         return table.concat(res, "\n")
     end,
@@ -203,13 +218,11 @@ TestSuite = TestCase{
         o = (...)._clone(...)
         o.tests = {}
         o.filenames = o.filenames or {}
-        if type(o.filenames) == string then
-            o.filenames = {o.filenames}
-        end
-        for k, v in pairs(o.filenames) do
+
+        for _, v in ipairs(o.filenames) do
             local tmp_modname, tmp_testcases = discoverTestCases(v)
             if tmp_modname then
-                for k, tstcase in pairs(tmp_testcases) do
+                for _, tstcase in ipairs(tmp_testcases) do
                     o:add(package.loaded[tmp_modname][tstcase])
                 end
             end
@@ -218,13 +231,13 @@ TestSuite = TestCase{
     end, 
 
     add = function (self, testobj)
-        for t in getTestMethodNames(testobj) do
+        for _, t in ipairs(getTestMethodNames(testobj)) do
             self.tests[#self.tests + 1] = testobj{t}
         end
     end,
 
     run = function (self, result)
-        for i, test in ipairs(self.tests) do
+        for _, test in ipairs(self.tests) do
             test:run(result)
         end
     end,

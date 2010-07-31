@@ -4,7 +4,7 @@ require "object"
 require "unittest"
 require "sampletestcases"
 
-unittestTest = unittest.TestCase{
+TestUnitTest = unittest.TestCase{
 
     testSimpleExecutionOrder = function (self) 
         local result = unittest.TestResult{}

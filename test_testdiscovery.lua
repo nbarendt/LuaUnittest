@@ -7,7 +7,7 @@ TestTestDiscovery = unittest.TestCase{
 
     setUp = function(self)
         self.sample_filename = "sampleunittests.lua"
-        self.expected_test_cases = {'unittestWithLogging',
+        self.expected_test_cases = {'TestCaseWithLogging',
          'TestSimplestCase', 'TestForcedErrorCase', 'TestMultipleTestsCase'}
         self.expected_test_count = 5
         table.sort(self.expected_test_cases)
