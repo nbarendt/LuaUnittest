@@ -139,7 +139,7 @@ TestResult = object.Object{
     getFailureCount = function (self)
         local count = 0
         for _, testrun in ipairs(self.testruns) do
-            if nil ~= testrun.err then
+            if testrun.err then
                 count = count + 1
             end
         end
@@ -186,7 +186,7 @@ TestResult = object.Object{
                 result = state[current_result]
                 current_result = current_result + 1
                 if not result then return nil end
-                if nil ~= result.err then return result end
+                if result.err then return result end
             end
             return result
         end
