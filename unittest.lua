@@ -158,7 +158,7 @@ TestResult = object.Object{
     end,
 
     summary = function (self)
-       local res = string.format("Ran %d tests in %s seconds",
+        local res = string.format("Ran %d tests in %s seconds",
             self:getRunCount(), self:getElapsedTime())
         local failures = self:getFailureCount()
         if failures > 0 then
