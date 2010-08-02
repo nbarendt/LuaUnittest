@@ -8,7 +8,7 @@ TestUnitTest = unittest.TestCase{
 
     testSimpleExecutionOrder = function (self) 
         local result = unittest.TestResult{}
-        test = sampletestcases.TestSimplestCase{name="testWillAlwaysPass"}
+        local test = sampletestcases.TestSimplestCase{test="testWillAlwaysPass"}
         self:assertEqual( "", test.log)
         test:run(result)
         local expected_log = "setUp testWillAlwaysPass tearDown"
@@ -17,12 +17,22 @@ TestUnitTest = unittest.TestCase{
 
     testTearDownEvenOnTestError = function (self) 
         local result = unittest.TestResult{}
-        test = sampletestcases.TestForcedErrorCase{}
+        local test = sampletestcases.TestForcedErrorCase{}
         self:assertEqual("", test.log)
-        test.name = "testWillError"
+        test.test = "testWillError"
         test:run(result)
         local expected_log = "setUp tearDown"
         self:assertEqual( expected_log, test.log)
+    end,
+
+    testTestCaseNameIsJustTestMethodByDefault = function (self)
+        local test = unittest.TestCase{'abc'}
+        self:assertEqual( 'abc', test:getTestName())        
+    end,
+
+    testTestCaseNameIsClassNamePlusTestMethod = function (self)
+        local test = unittest.TestCase{'abc', name='123'}
+        self:assertEqual( '123:abc', test:getTestName())        
     end,
 
     testSuite = function (self)

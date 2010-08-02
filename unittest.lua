@@ -70,8 +70,7 @@ end
 
 
 TestCase = object.Object{
-    _init={"name",},
-    name="",
+    _init={"test",},
 
     setUp = function (self)
     end,
@@ -101,10 +100,18 @@ TestCase = object.Object{
             string.format('"%s" not found in "%s"', pattern, actual))
     end,
 
+    getTestName = function (self)
+        if self.name then
+            return self.name .. ":" .. self.test
+        else
+            return self.test
+        end
+    end,
+
     run = function (self, result)
-        result:started(self.name, os.clock())
+        result:started(self:getTestName(), os.clock())
         self:setUp()
-        local method = self[self.name]
+        local method = self[self.test]
         local err_reporter = function (err)
             return err .. "\n" .. debug.traceback()
         end
@@ -191,7 +198,7 @@ TestResult = object.Object{
 }
 
 function formatFailure(testName, sep, err)
-    return string.format("TEST:  %s\n%s\n%s\n", testName, sep, err)
+    return string.format("FAILED %s\n%s\n%s\n", testName, sep, err)
 end
  
 FailureReporter = object.Object{
@@ -218,8 +225,10 @@ TestSuite = TestCase{
         for _, v in ipairs(o.filenames) do
             local tmp_modname, tmp_testcases = discoverTestCases(v)
             if tmp_modname then
-                for _, tstcase in ipairs(tmp_testcases) do
-                    o:add(package.loaded[tmp_modname][tstcase])
+                for _, test_case_name in ipairs(tmp_testcases) do
+                    local test_case = package.loaded[tmp_modname][test_case_name] 
+                    test_case.name = test_case_name
+                    o:add(test_case)
                 end
             end
         end
