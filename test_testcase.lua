@@ -1,6 +1,5 @@
 module(..., package.seeall)
 
-require "object"
 require "unittest"
 require "sampletestcases"
 

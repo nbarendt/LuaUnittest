@@ -1,6 +1,6 @@
-module( ..., package.seeall)
+module( "unittest", package.seeall)
 
-require "object"
+require "unittest.object"
 require "os"
 require "debug"
 require "strict"

@@ -1,6 +1,6 @@
 module( ..., package.seeall)
 
-require "object"
+local object = require "unittest.object"
 
 test_baseclass = object.Object{ __call = function (...)
     o = (...)._clone(...)

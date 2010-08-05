@@ -1,4 +1,4 @@
-module(..., package.seeall)
+module("unittest.object", package.seeall)
 
 local function clone(t)
     local u = setmetatable( {}, getmetatable(t))

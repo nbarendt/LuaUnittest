@@ -1,0 +1,11 @@
+INSTALL_TOP=/
+INSTALL_TOP_SHARE=$(INSTALL_TOP)/share/lua/5.1
+INSTALL_TOP_BIN=$(INSTALL_TOP)/bin
+INSTALL_EXEC=cp -a
+
+all: clean
+	$(INSTALL_EXEC) unit.lua $(INSTALL_TOP_BIN)
+	$(INSTALL_EXEC) unittest.lua $(INSTALL_TOP_SHARE) 
+	
+
+clean:
