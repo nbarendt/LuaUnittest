@@ -6,12 +6,11 @@ require "table"
 TestTestDiscovery = unittest.TestCase{
 
     setUp = function(self)
-        self.sample_filename = "sampleunittests.lua"
+        self.sample_filename = "tests/sampletestcases.lua"
         self.expected_test_cases = {'TestCaseWithLogging',
          'TestSimplestCase', 'TestForcedErrorCase', 'TestMultipleTestsCase'}
         self.expected_test_count = 5
         table.sort(self.expected_test_cases)
-        self.sample_filename = "sampletestcases.lua"
     end,
 
     testDiscoverWillReturnExpectedunittestNames = function (self) 

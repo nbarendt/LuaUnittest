@@ -1,7 +1,7 @@
 module(..., package.seeall)
 
 require "unittest"
-require "sampletestcases"
+sampletestcases = require "tests.sampletestcases"
 
 TestResultTest = unittest.TestCase{
 
