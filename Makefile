@@ -9,5 +9,7 @@ install:
 	$(INSTALL_EXEC) unit.lua $(INSTALL_TOP_BIN)
 	$(INSTALL_EXEC) unittest $(INSTALL_TOP_SHARE) 
 	
+test:
+	unit.lua
 
 clean:
