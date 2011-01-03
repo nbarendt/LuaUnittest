@@ -68,6 +68,15 @@ function findTestFiles()
     return results
 end
 
+function tablesAreEqual(a, b)
+  for k, v in pairs(a) do
+    if v ~= b[k] then return false end
+  end
+  for k, v in pairs(b) do
+   if v ~= a[k] then return false end
+  end
+  return true
+end
 
 TestCase = object.Object{
     _init={"test",},
@@ -79,9 +88,17 @@ TestCase = object.Object{
     end,
 
     assertEqual = function (self, expected, actual, msg)
-        assert( expected == actual, msg or
+        if type(expected) == 'table' then
+          -- probably a more efficient way to do this
+          --   also doesn't handle tables as values (nested)
+          assert( true == tablesAreEqual(expected, actual), msg or
+            string.format('Tables are Not Equal: Expected "%s" Actual "%s"',
+              tostring(expected), tostring(actual)))
+        else
+          assert( expected == actual, msg or
                 string.format('"%s" ~= "%s"', tostring(expected),
                     tostring(actual)))
+        end
     end,
 
     assertNotNil = function (self, value, msg)

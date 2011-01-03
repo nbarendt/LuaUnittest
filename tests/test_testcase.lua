@@ -53,4 +53,9 @@ TestUnitTest = unittest.TestCase{
         self:assertEqual(3, result:getRunCount())
         self:assertEqual(0, result:getFailureCount())
     end,
+
+    testAssertEqualsWorksOnArrays = function (self)
+      local test = unittest.TestCase{'abc'}
+      test:assertEqual( {1,2,3}, {1,2,3})
+    end,
 }
