@@ -3,13 +3,10 @@ module( "unittest", package.seeall)
 require "unittest.object"
 require "os"
 require "debug"
-require "strict"
-
 
 function isTestMethod (name, value)
     return 1 == name:find('test') and type(value) == "function" 
 end
-
 
 function getTestMethodNames (testobj)
     local results = {}
